@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">My Application</string>
+    <string name="explore">Explore</string>
+    <string name="library">Library</string>
+    <string name="notifications">Notification</string>
+    <string name="subscriptions">Subscription</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="save_to_watch_later">Save to Watch later</string>
+    <string name="report">Report</string>
+    <string name="don_t_recommend_channel">Don\'t recommend channel</string>
+    <string name="not_interested">Not interested</string>
+    <string name="share">Share</string>
+    <string name="save_to_playlist">Save to playlist</string>
+    <string name="home">Home</string>
+    <string name="comments">Comments</string>
+    <string name="remember_to_keep_comments_respectful_and_to_follow_our">Remember to keep comments respectful and to follow our</string>
+    <string name="community_guidelines">Community Guidelines</string>
+    <string name="add_a_comment">Add a comment</string>
+    <string name="_12d_ago">12d ago</string>
+    <string name="_30_replies">30 replies</string>
+    <string name="_2_1_k">2.1 K</string>
+</resources>
