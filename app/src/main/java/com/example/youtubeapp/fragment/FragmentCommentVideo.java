@@ -4,10 +4,12 @@ import android.app.Dialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -32,41 +34,14 @@ import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class FragmentCommentVideo extends BottomSheetDialogFragment implements InterfaceDefaultValue {
+public class FragmentCommentVideo extends Fragment implements InterfaceDefaultValue {
 
-    private CircleImageView ivAvtUserComment;
-    private EditText etUserComment;
-    private RecyclerView rvListComment;
-    private AdapterListComment adapterListComment;
-    private List<ItemComment> listCommentVideo;
-    private String idVideo;
-
-    @NonNull
+    @Nullable
     @Override
-    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        BottomSheetDialog bt = (BottomSheetDialog) super
-                .onCreateDialog(savedInstanceState);
-        View view = LayoutInflater.from(getContext())
-                .inflate(R.layout.fragment_comment_video, null);
-        bt.setContentView(view);
-
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
-        rvListComment.setLayoutManager(linearLayoutManager);
-        adapterListComment = new AdapterListComment(listCommentVideo);
-
-
-
-        mapping(view);
-
-        return bt;
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.layout_bottom_sheet_list_comment, container, false);
+        return view;
     }
-
-    private void mapping(View view) {
-        ivAvtUserComment = view.findViewById(R.id.iv_avt_user_comment);
-        etUserComment = view.findViewById(R.id.et_user_comment);
-        rvListComment = view.findViewById(R.id.rv_list_comment_video);
-    }
-
 //    public void getJsonCommentVideo(String idVideoItem){
 //        RequestQueue requestQueue = Volley.newRequestQueue(getContext());
 //        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET,

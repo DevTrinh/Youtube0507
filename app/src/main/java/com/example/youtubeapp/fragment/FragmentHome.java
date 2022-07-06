@@ -48,6 +48,7 @@ import java.util.concurrent.TimeUnit;
 public class FragmentHome extends Fragment implements InterfaceDefaultValue, SwipeRefreshLayout.OnRefreshListener {
     private SwipeRefreshLayout rfMain;
     public static ArrayList<ItemVideoMain> listItemVideo = new ArrayList<>();
+    public static ArrayList<ItemVideoMain> listPlayRelated = new ArrayList<>();
     private ProgressBar pbLoadListVideoMain;
     public RecyclerView rvListVideoMain, rvListHotKeys;
     public static AdapterListHotKeys adapterListHotKeys;
@@ -74,14 +75,17 @@ public class FragmentHome extends Fragment implements InterfaceDefaultValue, Swi
         adapterListHotKeys = new AdapterListHotKeys(getListKey());
         rvListHotKeys.setAdapter(adapterListHotKeys);
         adapterListHotKeys.notifyDataSetChanged();
+        getJsonApiYoutube();
         adapterMainVideoYoutube = new AdapterMainVideoYoutube(listItemVideo,
                 new InterfaceClickItemMainVideo() {
                     @Override
                     public void onClickItemVideoMainVideo(int position) {
+                        getUrlVideoRelated(listItemVideo.get(position).getIdVideo());
                         Intent intentMainToPlayVideo =
                                 new Intent(getContext(), ActivityPlayVideo.class);
                         intentMainToPlayVideo.putExtra(VALUE_ITEM_VIDEO,
                                 listItemVideo.get(position));
+                        Log.d("asdddddddddddddddddd", listPlayRelated.size()+"");
                         startActivity(intentMainToPlayVideo);
                     }
 
@@ -93,8 +97,8 @@ public class FragmentHome extends Fragment implements InterfaceDefaultValue, Swi
                                 .getSupportFragmentManager(), getTag());
                     }
                 });
+
         rvListVideoMain.setAdapter(adapterMainVideoYoutube);
-        getJsonApiYoutube();
 
         return view;
     }
@@ -118,6 +122,7 @@ public class FragmentHome extends Fragment implements InterfaceDefaultValue, Swi
                             String viewCount = "";
                             String numberLiker = "";
                             String commentCount = "";
+                            String urlAvtChannel = "";
                             JSONArray jsonItems = response.getJSONArray(ITEMS);
                             Log.d("AAAAAAAAAAAAA", jsonItems.length() + "");
                             for (int i = 0; i < jsonItems.length(); i++) {
@@ -147,15 +152,14 @@ public class FragmentHome extends Fragment implements InterfaceDefaultValue, Swi
                                     commentCount = formatComment(Integer
                                             .parseInt(jsonStatistics.getString(COMMENT_COUNT)));
                                 }
+                                getUrlAvtNbSubscribeChannel(listItemVideo, idChannel, i);
 //                                Log.d("Comment Count"+i, commentCount);
                                 listItemVideo.add(new ItemVideoMain(titleVideo,
                                         urlThumbnail, idChannel, channelName,
                                         viewCount, publishedAt, idVideo,
                                         commentCount, numberLiker));
-
                                 adapterMainVideoYoutube.notifyDataSetChanged();
                                 pbLoadListVideoMain.setVisibility(View.GONE);
-                                getUrlAvtNbSubscribeChannel(idChannel, i);
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -170,7 +174,74 @@ public class FragmentHome extends Fragment implements InterfaceDefaultValue, Swi
         requestQueue.add(jsonObjectRequest);
     }
 
-    private void getUrlAvtNbSubscribeChannel(String ID_CHANNEL, int position) {
+    private void getUrlVideoRelated(String idRelated){
+        String API_RELATED_VIDEO = "https://youtube.googleapis.com/youtube/v3/search?part=snippet&maxResults=25&relatedToVideoId="
+                +idRelated+"&type=video&key="+API_KEY+"";
+        RequestQueue requestQueue = Volley.newRequestQueue(getContext());
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET,
+                API_RELATED_VIDEO, null,
+                new Response.Listener<JSONObject>() {
+                    @SuppressLint("NotifyDataSetChanged")
+                    @RequiresApi(api = Build.VERSION_CODES.O)
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            JSONArray jsonItems = response.getJSONArray(ITEMS);
+                            Log.d("LENGTHHHHHH", jsonItems.length()+"");
+                            String idVideo = "";
+                            String titleVideo = "Best Relaxing Piano Studio Ghibli Complete Collection 2022 (No Mid-roll Ads)";
+                            String publishedAt = "";
+                            String idChannel = "";
+                            String urlThumbnail = "";
+                            String channelName = "";
+                            String viewCount = "2.725 lượt xem";
+                            String numberLiker = "";
+                            String commentCount = "";
+                            for (int i = 0; i<jsonItems.length(); i++){
+                                JSONObject jsonItem = jsonItems.getJSONObject(i);
+                                JSONObject jsonIdVideo = jsonItem.getJSONObject(ID);
+                                idVideo = jsonIdVideo.getString(ID_VIDEO);
+//                        Log.d("ID", idVideo+"");
+                                if (jsonItem.has(SNIPPET)){
+                                    JSONObject jsonSnippet = jsonItem.getJSONObject(SNIPPET);
+                                    titleVideo = jsonSnippet.getString(TITLE);
+//                            Log.d("LOGGG"+i, titleVideo+"");
+                                    idChannel = jsonSnippet.getString(CHANNEL_ID);
+//                            Log.d("ID CHANNEL "+i, idChannel+"");
+                                    JSONObject jsonThumbnail = jsonSnippet.getJSONObject(THUMBNAIL);
+                                    JSONObject jsonHighImg = jsonThumbnail.getJSONObject(HIGH);
+                                    urlThumbnail = jsonHighImg.getString(URL);
+//                            Log.d("IMAGE "+i, urlThumbnail);
+                                    channelName = jsonSnippet.getString(CHANNEL_TITLE);
+                                    Log.d("CHANNEL NAME: "+i, channelName+"");
+                                    publishedAt = formatTimeUpVideo(jsonSnippet
+                                            .getString(PUBLISHED_AT) + "");
+                                    Log.d(PUBLISHED_AT, publishedAt+"");
+//                            getViewer(idRelated);
+//                            Log.d("JSON STATICS: ", listViewer.size()+"")
+                                }
+                                listPlayRelated.add(new ItemVideoMain(titleVideo,
+                                        urlThumbnail, idChannel,
+                                        channelName, viewCount,
+                                        publishedAt, idVideo,
+                                        commentCount, numberLiker));
+                                adapterMainVideoYoutube.notifyDataSetChanged();
+                            };
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(getContext(), error+"",
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+        requestQueue.add(jsonObjectRequest);
+    }
+
+    private void getUrlAvtNbSubscribeChannel(ArrayList<ItemVideoMain> listItemVideo, String ID_CHANNEL, int position) {
         RequestQueue requestQueue = Volley.newRequestQueue(getContext());
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET,
                 "https://youtube.googleapis.com/youtube/v3/channels?part=snippet%2Cstatistics&id="
@@ -185,8 +256,8 @@ public class FragmentHome extends Fragment implements InterfaceDefaultValue, Swi
                     JSONObject jsonThumbnail = jsonSnippet.getJSONObject(THUMBNAIL);
                     JSONObject jsonHigh = jsonThumbnail.getJSONObject(HIGH);
                     urlChannel = jsonHigh.getString(URL);
-                    listItemVideo.get(position).setUrlAvtChannel(urlChannel);
-                    //Log.d("LINK "+position, jsonHigh.getString(URL));
+                    listItemVideo.get(position).setUrlAvtChannel(jsonHigh.getString(URL)+"");
+//                    Log.d("LINK "+position, jsonHigh.getString(URL));
                     JSONObject jsonStatics = jsonItem.getJSONObject(STATISTICS);
                     listItemVideo.get(position).setNumberSubscribe(formatSubscribe
                             (Integer.parseInt(jsonStatics.getString(SUBSCRIBE_COUNT))));
@@ -219,7 +290,8 @@ public class FragmentHome extends Fragment implements InterfaceDefaultValue, Swi
         return list;
     }
 
-    public String formatViewer(int value) {
+    @NonNull
+    public static String formatViewer(int value) {
         String arr[] = {"", "K", "M", "B", "T", "P", "E"};
         int index = 0;
         while ((value / 1000) >= 1) {
@@ -264,7 +336,7 @@ public class FragmentHome extends Fragment implements InterfaceDefaultValue, Swi
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public String formatTimeUpVideo(String time) {
+    public static String formatTimeUpVideo(String time) {
         String timeEnd = java.time.Clock.systemUTC().instant().toString();
         String timeStart = time;
         Instant start = Instant.parse(timeStart);

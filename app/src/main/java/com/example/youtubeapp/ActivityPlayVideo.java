@@ -1,5 +1,7 @@
 package com.example.youtubeapp;
 
+import static com.example.youtubeapp.R.*;
+
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
@@ -8,7 +10,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,28 +21,17 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
 import com.example.youtubeapp.adapter.AdapterMainVideoYoutube;
 import com.example.youtubeapp.fragment.FragmentHome;
 import com.example.youtubeapp.interfacee.InterfaceClickItemMainVideo;
 import com.example.youtubeapp.interfacee.InterfaceDefaultValue;
 import com.example.youtubeapp.item.ItemVideoMain;
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.youtube.player.YouTubeBaseActivity;
 import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayerView;
 import com.squareup.picasso.Picasso;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -59,10 +49,11 @@ public class ActivityPlayVideo extends YouTubeBaseActivity
     YouTubePlayer ypPlayItemClick;
     ImageView ivOpenDescription;
     CheckBox cbNotificationChannel;
-    ConstraintLayout clComment;
-    AdapterMainVideoYoutube adapterListVideoYoutube = FragmentHome.adapterMainVideoYoutube;
-
-    ArrayList<ItemVideoMain> listPlayRelated = new ArrayList<>();
+    public ConstraintLayout clComment;
+    AdapterMainVideoYoutube adapterListVideoYoutube;
+    private String viewer;
+    ArrayList<String> listViewer = new ArrayList<>();
+    public static ArrayList<ItemVideoMain> listPlayRelate = new ArrayList<>();
 
     private boolean numberLikeCheck = true;
     private String id = "";
@@ -71,7 +62,7 @@ public class ActivityPlayVideo extends YouTubeBaseActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_play_video);
+        setContentView(layout.activity_play_video);
 
         mapping();
 
@@ -80,7 +71,6 @@ public class ActivityPlayVideo extends YouTubeBaseActivity
         Intent getDataInMain = getIntent();
         ItemVideoMain itemData = (ItemVideoMain) getDataInMain
                 .getSerializableExtra(VALUE_ITEM_VIDEO);
-
 //        Toast.makeText(this, itemData.getTvTitleVideo()+"", Toast.LENGTH_SHORT).show();
         id = itemData.getIdVideo();
         tvTimeUp.setText(itemData.getTvTimeUp());
@@ -97,8 +87,7 @@ public class ActivityPlayVideo extends YouTubeBaseActivity
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         rvListVideoPlay.setLayoutManager(linearLayoutManager);
 
-        getUrlVideoRelated(id);
-
+        Toast.makeText(this, FragmentHome.listPlayRelated.size()+"", Toast.LENGTH_SHORT).show();
         adapterListVideoYoutube =
                 new AdapterMainVideoYoutube(FragmentHome.listItemVideo,
                         new InterfaceClickItemMainVideo() {
@@ -126,11 +115,11 @@ public class ActivityPlayVideo extends YouTubeBaseActivity
                             }
                         });
         rvListVideoPlay.setAdapter(adapterListVideoYoutube);
-
+        adapterListVideoYoutube.notifyDataSetChanged();
         clComment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("Comment: ", v+"");
+
             }
         });
 
@@ -138,11 +127,11 @@ public class ActivityPlayVideo extends YouTubeBaseActivity
             @Override
             public void onClick(View v) {
                 if (numberLikeCheck) {
-                    ivLiked.setImageResource(R.drawable.ic_like_on);
-                    ivDisliked.setImageResource(R.drawable.ic_dislike);
+                    ivLiked.setImageResource(drawable.ic_like_on);
+                    ivDisliked.setImageResource(drawable.ic_dislike);
                     numberLikeCheck = false;
                 } else {
-                    ivLiked.setImageResource(R.drawable.ic_like);
+                    ivLiked.setImageResource(drawable.ic_like);
                     numberLikeCheck = true;
                 }
             }
@@ -152,12 +141,12 @@ public class ActivityPlayVideo extends YouTubeBaseActivity
             @Override
             public void onClick(View v) {
                 if (numberLikeCheck == false) {
-                    ivDisliked.setImageResource(R.drawable.ic_dislike_on);
-                    ivLiked.setImageResource(R.drawable.ic_like);
+                    ivDisliked.setImageResource(drawable.ic_dislike_on);
+                    ivLiked.setImageResource(drawable.ic_like);
                     numberLikeCheck = true;
                 } else {
-                    ivDisliked.setImageResource(R.drawable.ic_dislike);
-                    ivLiked.setImageResource(R.drawable.ic_like);
+                    ivDisliked.setImageResource(drawable.ic_dislike);
+                    ivLiked.setImageResource(drawable.ic_like);
                     numberLikeCheck = false;
                 }
             }
@@ -210,90 +199,35 @@ public class ActivityPlayVideo extends YouTubeBaseActivity
         });
     }
 
-    public void getUrlVideoRelated(String idRelated){
-        String API_RELATED_VIDEO = "https://youtube.googleapis.com/youtube/v3/search?part=snippet&maxResults=25&relatedToVideoId="
-                +idRelated+"&type=video&key="+API_KEY+"";
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET,
-                API_RELATED_VIDEO, null,
-                new Response.Listener<JSONObject>() {
-            @RequiresApi(api = Build.VERSION_CODES.O)
-            @Override
-            public void onResponse(JSONObject response) {
-                try {
-                    JSONArray jsonItems = response.getJSONArray(ITEMS);
-                    Log.d("LENGTHHHHHH", jsonItems.length()+"");
-                    String idVideo = "";
-                    String titleVideo = "";
-                    String publishedAt = "";
-                    String idChannel = "";
-                    String urlThumbnail = "";
-                    String channelName = "";
-                    String viewCount = "";
-                    for (int i = 0; i<jsonItems.length(); i++){
-                        JSONObject jsonItem = jsonItems.getJSONObject(i);
-                        JSONObject jsonIdVideo = jsonItem.getJSONObject(ID);
-                        idVideo = jsonIdVideo.getString(ID_VIDEO);
-//                        Log.d("ID", idVideo+"");
-                        if (jsonItem.has(SNIPPET)){
-                            JSONObject jsonSnippet = jsonItem.getJSONObject(SNIPPET);
-                            titleVideo = jsonSnippet.getString(TITLE);
-//                            Log.d("LOGGG"+i, titleVideo+"");
-                            idChannel = jsonSnippet.getString(CHANNEL_ID);
-//                            Log.d("ID CHANNEL "+i, idChannel);
-                            JSONObject jsonThumbnail = jsonSnippet.getJSONObject(THUMBNAIL);
-                            JSONObject jsonHighImg = jsonThumbnail.getJSONObject(HIGH);
-                            urlThumbnail = jsonHighImg.getString(URL);
-//                            Log.d("IMAGE "+i, urlThumbnail);
-                            channelName = jsonSnippet.getString(CHANNEL_TITLE);
-//                            Log.d("CHANNEL NAME: "+i, channelName+"");
-                            publishedAt = formatTimeUpVideo(jsonSnippet
-                                    .getString(PUBLISHED_AT) + "");
-//                            Log.d(PUBLISHED_AT, publishedAt+"");
 
-                        }
-                    };
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(ActivityPlayVideo.this, error+"",
-                        Toast.LENGTH_SHORT).show();
-            }
-        });
-        requestQueue.add(jsonObjectRequest);
-    }
 
-    public void getViewer(String id){
-        String API_VIEWER = "https://youtube.googleapis.com/youtube/v3/videos?part=statistics&id="
-                +id+"&key="+API_KEY+"";
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET,
-                API_VIEWER, null, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                try {
-                    JSONArray jsonItems = response.getJSONArray(ITEMS);
-                    JSONObject jsonItem = jsonItems.getJSONObject(0);
-                    JSONObject jsonStatics = jsonItem.getJSONObject(STATISTICS);
-                    Log.d("JSON STATICS: ", jsonStatics.getString(VIEW_COUNT));
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-
-            }
-        });
-        requestQueue.add(jsonObjectRequest);
-    }
-
+//    public void getViewer(String id){
+//        String view = "";
+//        String API_VIEWER = "https://youtube.googleapis.com/youtube/v3/videos?part=statistics&id="
+//                +id+"&key="+API_KEY+"";
+//        RequestQueue requestQueue = Volley.newRequestQueue(this);
+//        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET,
+//                API_VIEWER, null, new Response.Listener<JSONObject>() {
+//            @Override
+//            public void onResponse(JSONObject response) {
+//                try {
+//                    JSONArray jsonItems = response.getJSONArray(ITEMS);
+//                    JSONObject jsonItem = jsonItems.getJSONObject(0);
+//                    JSONObject jsonStatics = jsonItem.getJSONObject(STATISTICS);
+//                    listViewer.add(FragmentHome.formatViewer(Integer.parseInt(jsonStatics.getString(VIEW_COUNT))));
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }, new Response.ErrorListener() {
+//            @Override
+//            public void onErrorResponse(VolleyError error) {
+//                Toast.makeText(ActivityPlayVideo.this, error+"", Toast.LENGTH_SHORT).show();
+//            }
+//        });
+//        requestQueue.add(jsonObjectRequest);
+//    }
+//
     @RequiresApi(api = Build.VERSION_CODES.O)
     public String formatTimeUpVideo(String time) {
         String timeEnd = java.time.Clock.systemUTC().instant().toString();

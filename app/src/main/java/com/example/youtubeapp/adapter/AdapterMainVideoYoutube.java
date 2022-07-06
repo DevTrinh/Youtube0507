@@ -23,7 +23,7 @@ import java.util.ArrayList;
 public class AdapterMainVideoYoutube extends
         RecyclerView.Adapter<AdapterMainVideoYoutube.ItemVideoMainViewHolder> {
 
-    private ArrayList<ItemVideoMain> listItemVideoMain;
+    private ArrayList<ItemVideoMain> listItemVideoMain = new ArrayList<>();
     private InterfaceClickItemMainVideo interfaceClickItemMainVideo;
 
     public AdapterMainVideoYoutube(ArrayList<ItemVideoMain> listItemVideoMain,
@@ -47,6 +47,7 @@ public class AdapterMainVideoYoutube extends
         if (itemVideoMain == null) {
             return;
         }
+
         holder.tvTitleMainItem.setText(itemVideoMain.getTvTitleVideo());
         holder.tvTimeUp.setText(itemVideoMain.getTvTimeUp());
         holder.tvNameChannel.setText(itemVideoMain.getTvNameChannel());

@@ -5,6 +5,11 @@ import com.example.youtubeapp.interfacee.InterfaceDefaultValue;
 import java.io.Serializable;
 
 public class ItemVideoMain implements Serializable, InterfaceDefaultValue {
+
+
+    private String titleVideo;
+    private String urlThumbnail;
+
     public String getTvTitleVideo() {
         return tvTitleVideo;
     }
@@ -96,18 +101,17 @@ public class ItemVideoMain implements Serializable, InterfaceDefaultValue {
     private String tvTitleVideo;
     private String ivVideo;
     private String idChannel;
+    private String channelName;
+    private String viewCount;
     private String tvNameChannel;
     private String tvViewCount;
     private String tvTimeUp;
+    private String publishedAt;
     private String idVideo;
     private String tvCommentCount;
     private String likeCount;
     private String urlAvtChannel;
     private String numberSubscribe;
-
-    public ItemVideoMain(String urlAvtChannel) {
-        this.urlAvtChannel = urlAvtChannel;
-    }
 
     public ItemVideoMain(String tvTitleVideo, String ivVideo, String idChannel,
                          String tvNameChannel, String tvViewCount, String tvTimeUp,

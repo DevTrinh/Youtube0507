@@ -9,6 +9,7 @@ import androidx.fragment.app.FragmentTransaction;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -17,6 +18,7 @@ import com.example.youtubeapp.fragment.FragmentHome;
 import com.example.youtubeapp.fragment.FragmentLibrary;
 import com.example.youtubeapp.fragment.FragmentNotify;
 import com.example.youtubeapp.fragment.FragmentSubs;
+import com.example.youtubeapp.fragment.FragmentValueSearch;
 import com.example.youtubeapp.interfacee.InterfaceDefaultValue;
 public class MainActivity extends AppCompatActivity implements InterfaceDefaultValue {
 
@@ -25,24 +27,45 @@ public class MainActivity extends AppCompatActivity implements InterfaceDefaultV
     private FragmentHome fragmentHome;
     private FragmentNotify fragmentNotify;
     private FragmentLibrary fragmentLibrary;
+    private FragmentValueSearch fragmentValueSearch;
     private ImageView ivEndNavHome, ivEndNavExplore,
-            ivEndNavSubscriptions, ivEndNavNotification, ivEndNavLibrary;
+            ivEndNavSubscriptions, ivEndNavNotification,
+            ivEndNavLibrary, ivSearch;
     FragmentManager fragmentManager = getSupportFragmentManager();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        startActivity(new Intent(this, StartApp.class));
+//        startActivity(new Intent(this, StartApp.class));
         mapping();
 
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        //ADD FRAGMENT
-        fragmentHome = new FragmentHome();
-        fragmentTransaction.add(R.id.cl_contains_fragment, fragmentHome, FRAGMENT_HOME);
-        fragmentTransaction.addToBackStack(FRAGMENT_HOME);
-        fragmentTransaction.commit();
+        Intent getStringSearch = getIntent();
+        String valueSearch = getStringSearch.getStringExtra(VALUE_SEARCH);
+        if (valueSearch != null){
+            Log.d("AHIHIHIHIHIHIIHIHI", valueSearch+"");
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            //ADD FRAGMENT
+             fragmentValueSearch = new FragmentValueSearch();
+            fragmentTransaction.add(R.id.cl_contains_fragment, fragmentHome, FRAGMENT_HOME);
+            fragmentTransaction.addToBackStack(FRAGMENT_HOME);
+            fragmentTransaction.commit();
+        }
+        else{
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            //ADD FRAGMENT
+            fragmentHome = new FragmentHome();
+            fragmentTransaction.add(R.id.cl_contains_fragment, fragmentHome, FRAGMENT_HOME);
+            fragmentTransaction.addToBackStack(FRAGMENT_HOME);
+            fragmentTransaction.commit();
+        }
 
-
+        ivSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intentToSearch = new Intent(MainActivity.this, ActivitySearchVideo.class);
+                startActivity(intentToSearch);
+            }
+        });
     }
     public void onClickHome(@NonNull View view) {
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -51,8 +74,11 @@ public class MainActivity extends AppCompatActivity implements InterfaceDefaultV
             case R.id.iv_end_bar_home:
                 setDisplayEndNavOff();
                 ivEndNavHome.setImageResource(R.drawable.ic_home_on);
-                getSupportFragmentManager().popBackStack(FRAGMENT_HOME, 0);
 
+                fragmentHome = new FragmentHome();
+                fragmentTransaction.add(R.id.cl_contains_fragment, fragmentHome, FRAGMENT_HOME);
+                fragmentTransaction.addToBackStack(FRAGMENT_HOME);
+                getSupportFragmentManager().popBackStack(FRAGMENT_HOME, 0);
                 break;
             case R.id.iv_end_bar_explore:
                 setDisplayEndNavOff();
@@ -113,6 +139,7 @@ public class MainActivity extends AppCompatActivity implements InterfaceDefaultV
 
     @SuppressLint("WrongViewCast")
     public void mapping() {
+        ivSearch = findViewById(R.id.iv_top_bar_search);
         ivEndNavExplore = findViewById(R.id.iv_end_bar_explore);
         ivEndNavHome = findViewById(R.id.iv_end_bar_home);
         ivEndNavSubscriptions = findViewById(R.id.iv_end_bar_subscriptions);
