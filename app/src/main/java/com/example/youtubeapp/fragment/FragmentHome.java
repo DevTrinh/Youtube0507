@@ -15,8 +15,10 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -43,7 +45,8 @@ import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 
-public class FragmentHome extends Fragment implements InterfaceDefaultValue {
+public class FragmentHome extends Fragment implements InterfaceDefaultValue, SwipeRefreshLayout.OnRefreshListener {
+    private SwipeRefreshLayout rfMain;
     public static ArrayList<ItemVideoMain> listItemVideo = new ArrayList<>();
     private ProgressBar pbLoadListVideoMain;
     public RecyclerView rvListVideoMain, rvListHotKeys;
@@ -58,6 +61,8 @@ public class FragmentHome extends Fragment implements InterfaceDefaultValue {
         View view = inflater.inflate(R.layout.fragment_home,
                 container, false);
         mapping(view);
+
+        rfMain.setOnRefreshListener(this);
         LinearLayoutManager linearLayoutManager =
                 new LinearLayoutManager(getContext());
         rvListVideoMain.setLayoutManager(linearLayoutManager);
@@ -89,8 +94,8 @@ public class FragmentHome extends Fragment implements InterfaceDefaultValue {
                     }
                 });
         rvListVideoMain.setAdapter(adapterMainVideoYoutube);
-
         getJsonApiYoutube();
+
         return view;
     }
 
@@ -293,9 +298,15 @@ public class FragmentHome extends Fragment implements InterfaceDefaultValue {
     }
 
     public void mapping(@NonNull View view) {
+        rfMain = view.findViewById(R.id.rf_layout_main);
         ImageView ivMenuItemVideoMain = view.findViewById(R.id.iv_item_main_menu_vertical);
         pbLoadListVideoMain = view.findViewById(R.id.pb_load_list_video_main);
         rvListHotKeys = view.findViewById(R.id.lv_hot_keywords);
         rvListVideoMain = view.findViewById(R.id.rv_list_video_main);
+    }
+
+    @Override
+    public void onRefresh() {
+
     }
 }

@@ -9,11 +9,14 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.youtubeapp.R;
 import com.example.youtubeapp.interfacee.InterfaceDefaultValue;
 
 public class FragmentNotify extends Fragment implements InterfaceDefaultValue {
+
+    private SwipeRefreshLayout â;
 
     @Nullable
     @Override
